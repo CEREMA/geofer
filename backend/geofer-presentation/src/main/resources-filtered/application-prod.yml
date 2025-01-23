@@ -1,0 +1,81 @@
+# ===================================================================
+# Spring Boot configuration.
+#
+# Contient uniquement les valeurs spécifiques à la PROD
+#
+# Pour que cette configuration soit utilisée, il faut appliquer un profil spring nommé prod
+# On peut spécifier le profil actif via une option tomcat -Dspring.profiles.active=prod
+# ===================================================================
+
+#logging:
+#  config: classpath:logback-spring-ci.xml
+
+logging:
+  config: classpath:logback-spring.xml
+  level:
+    org:
+      springframework: INFO
+      hibernate:
+        SQL: INFO
+        type:
+          descriptor:
+            sql:
+              BasicBinder: TRACE
+
+spring:
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=5000,expireAfterWrite=1d
+  output:
+    ansi:
+      # Pas de couleur dans les logs de la console : maximise la compatibilité
+      enabled: never
+  jpa:
+    open-in-view: 'false'
+    show-sql: false
+    database-platform: org.hibernate.spatial.dialect.postgis.PostgisPG10Dialect
+    properties:
+      hibernate:
+        show_sql: true
+        format-sql: false
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        use_sql_comments: false
+        jdbc:
+          lob:
+            non_contextual_creation: true
+        hbm2ddl:
+          auto: none
+        default_schema: geofer
+  flyway:
+    enabled: false
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    driver-class-name: org.postgresql.Driver
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+  jackson:
+    serialization:
+      # optimise performance
+      indent_output: false
+      fail-on-self-references: false
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI}
+          issuer-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI}
+
+# En prod ne mettre que health
+management:
+  endpoints:
+    web:
+      exposure:
+        include: 'health'
+
+info:
+  app:
+    audience: demo
+    issuer: ${INFO_APP_ISSUER}
+    # Ce numéro de version est automatiquement mis à jour par le build Maven
+    version: '@project.version@'

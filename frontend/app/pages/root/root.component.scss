@@ -1,0 +1,914 @@
+* {
+  box-sizing: border-box;
+}
+
+:host {
+  display: block;
+  margin: 0;
+  height: 100%;
+  margin: 0px;
+}
+
+.toolbox {
+  position: absolute;
+  top: 280px;
+  left: 90px;
+  z-index: 1000;
+}
+
+.delbtn {
+  background-color: #eeee;
+  background-image: url(images/eraser.svg);
+  background-size: contain;
+  border: 1px solid darkgray;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.histobtn {
+  margin-top: 10px;
+  background-color: #eeee;
+  background-image: url(images/histogram.svg);
+  background-size: contain;
+  border: 1px solid darkgray;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.map-container {
+  flex: 1; /* Assure que la carte prend tout l'espace restant dans le layout-content */
+  position: relative;
+  width: 100%;
+  height: 100%; /* La carte prend toute la hauteur disponible */
+  background: white;
+}
+
+#map {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.xmark {
+  cursor: pointer;
+  color: white;
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  font-size: 2rem;
+}
+
+.gares-selector {
+  z-index: 100000;
+  position: absolute;
+  right: 260px;
+  top: 17px;
+  width: 480px;
+  height: 47px;
+}
+
+.gares2Selector {
+  z-index: 1000;
+  position: absolute;
+  left: 20px;
+  top: 25px;
+}
+
+.info {
+  z-index: 900;
+  position: absolute;
+  left: 80px;
+  bottom: 10px;
+  border: 1px solid #eeee;
+  height: 43px;
+  width: 300px;
+  background-color: #ffff;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.title5 {
+  font-size: 18px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  display: inline-flex; /* ou inline-block si vous n'utilisez pas d'alignements complexes */
+  align-items: center; /* Pour aligner verticalement le point d'interrogation avec le texte */
+}
+
+.point-interrogation {
+  background-image: url(images/point_interrogation.png);
+  width: 22px;
+  height: 22px;
+  background-size: contain;
+  display: inline-block; /* Assure que l'icône soit alignée sur la ligne avec le texte */
+  margin-left: 5px; /* Ajoute un espace entre le texte et l'icône */
+}
+
+.info-expanded {
+  z-index: 999999999;
+  position: absolute;
+  left: 80px;
+  bottom: 10px;
+  border: 1px solid #eeee;
+  height: 700px;
+  width: 300px;
+  background-color: #ffff;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.chevron {
+  float: right;
+}
+
+.infoTitle {
+  font-size: 14px;
+  font-weight: bold;
+  margin: 10px;
+}
+
+.leyenda {
+  height: 20px;
+}
+
+.color {
+  float: left;
+  width: 40px;
+  height: 2px;
+  margin-left: 10px;
+  margin-top: 2px;
+}
+
+.googleman {
+  cursor: pointer;
+  float: right;
+  background-image: url(images/googleman.png);
+  width: 48px;
+  height: 48px;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.ite_title {
+  font-weight: bold;
+}
+
+.red {
+  color: red;
+}
+
+.blue {
+  color: blue;
+}
+
+.green {
+  color: green;
+}
+
+.single {
+  border: 1px solid;
+}
+
+.dashed {
+  border: 1px dashed;
+}
+
+.dashed-weight {
+  border: 5px dashed;
+}
+
+.infoLegende {
+  float: left;
+  margin-left: 6px;
+}
+
+.logo {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 70px;
+  background-image: url('images/lgo.png');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: bottom;
+  border-left: 1px solid black;
+}
+
+.accordion {
+  position: relative;
+  width: 100%;
+  border-bottom: 1px solid #cccc;
+}
+
+.accordion-input {
+  display: none;
+}
+
+.accordion-label {
+  display: block;
+  padding: 15px;
+  background: #ffff;
+  cursor: pointer;
+  font-weight: bold;
+  user-select: none;
+  border-top: 1px solid #cccc;
+}
+
+.accordion-label:hover {
+  background: #e7e7e7;
+}
+
+.accordion-content {
+  height: 0;
+  overflow: hidden;
+  transition: height 0.3s ease-out;
+  background: #fff;
+}
+
+.accordion-input:checked + .accordion-label + .accordion-content {
+  height: auto;
+  padding: 15px;
+}
+
+.accordion-content p {
+  margin: 0;
+  width: 100%;
+}
+
+/**
+**/
+
+.p-sidebar {
+  position: relative; /* S'assurer que les sidebars ont un positionnement */
+  z-index: 2; /* Mettre un z-index plus élevé que la carte */
+}
+
+.map-button {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  background-color: #eeee;
+  width: 100px;
+  height: 100px;
+}
+
+.layout-config-button {
+  position: fixed;
+  width: 4rem;
+  height: 4rem;
+  background: var(--primary-color);
+  color: var(--primary-color-text);
+  top: 50%;
+  right: 0;
+  margin-top: -2rem;
+  border-radius: 30px 0 0 30px;
+  transition: background-color var(--transition-duration);
+  overflow: hidden;
+  cursor: pointer;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: -0.25rem 0 1rem #00000026;
+}
+
+.layout-config-button i {
+  font-size: 2.5rem;
+  line-height: inherit;
+  transform: rotate(0);
+  transition: transform 1s;
+}
+
+.layout-config-button:hover {
+  background-color: var(--primary-400);
+}
+
+.layout-config-map-button {
+  width: 4rem;
+  height: 4rem;
+  background: var(--primary-color);
+  color: var(--primary-color-text);
+  top: 0;
+  left: 0;
+  border: none;
+  border-bottom-right-radius: 30px;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  transition: background-color var(--transition-duration);
+  overflow: hidden;
+  cursor: pointer;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: -0.25rem 0 1rem #00000026;
+}
+
+.layout-config-map-button i {
+  font-size: 2.5rem;
+  line-height: inherit;
+  transform: rotate(0);
+  transition: transform 1s;
+}
+
+.layout-config-map-button:hover {
+  background-color: var(--primary-400);
+}
+
+:host ::ng-deep .p-sidepanel-header {
+  border-top-left-radius: 10px; /* Ajustez la valeur selon l'arrondi désiré */
+}
+
+.menu-title {
+  background-color: var(--primary-500);
+  color: var(--primary-color-text);
+  margin-top: 4px;
+  margin-bottom: 4px;
+  margin-left: 4px;
+}
+
+:host ::ng-deep {
+  .tooltip-wrapper {
+    min-width: max-content;
+  }
+  .leaflet-control-container {
+    position: absolute;
+    top: 80px;
+    left: 10px;
+    width: calc(100% - 50px);
+    height: calc(100% - 80px);
+  }
+
+  .move-container-right {
+    top: 80px;
+    left: 400px;
+  }
+
+  .move-container-left {
+    top: 80px;
+    left: 10px;
+  }
+
+  .p-accordion .p-accordion-header .p-accordion-header-link {
+    border: none !important;
+    color: var(--text-color);
+    border-radius: 0px !important;
+    background: white;
+  }
+
+  .p-accordion
+    .p-accordion-header:not(.p-disabled)
+    .p-accordion-header-link:focus {
+    box-shadow: none;
+  }
+
+  .p-accordion .p-accordion-tab {
+    margin-bottom: 0.5px;
+  }
+
+  .p-accordion .p-accordion-content {
+    border: none;
+    border-radius: 0px;
+  }
+
+  .p-accordion-header {
+    border: 0px solid black;
+  }
+  .p-accordion-content {
+    border: 0px solid black;
+    margin: 0px !important;
+    padding: 0px !important;
+  }
+  .layout-menu-container {
+    border: 0px solid black;
+    z-index: 9999 !important;
+  }
+  .layout-content-inner {
+    width: 100% !important;
+    height: 100% !important;
+  }
+  .p-accordion-tab:not(.p-accordion-tab-active) {
+    .p-toggleable-content {
+      border: 0px solid black !important;
+      height: 0;
+      overflow: hidden;
+    }
+  }
+
+  .p-accordion-tab.p-accordion-tab-active {
+    .p-toggleable-content {
+      height: auto !important;
+    }
+  }
+
+  .p-sidebar-right {
+    position: absolute;
+    height: 100%;
+    z-index: 2;
+    width: 23rem;
+    box-shadow: -10px 0 10px -5px rgba(0, 0, 0, 0.5);
+  }
+
+  .p-component-overlay {
+    display: none !important;
+  }
+
+  .p-sidebar-header {
+    display: none;
+  }
+
+  .p-sidebar-header-custom {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--primary-500);
+    color: var(--primary-color-text);
+  }
+
+  .p-sidebar-content {
+    overflow: hidden;
+    padding: 0 !important;
+    height: 100%;
+  }
+
+  .p-sidebar .p-sidebar-header-custom .p-sidebar-close,
+  .p-sidebar .p-sidebar-header-custom .p-sidebar-icon {
+    width: 2rem;
+    height: 2rem;
+    color: var(--primary-color-text);
+    border: 0 none;
+    background: transparent;
+    border-radius: 50%;
+    transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+  }
+
+  .p-sidebar .p-sidebar-header-custom .p-sidebar-close:enabled:hover,
+  .p-sidebar .p-sidebar-header-custom .p-sidebar-icon:enabled:hover {
+    color: #343a40;
+    border-color: transparent;
+    background: #e9ecef;
+  }
+
+  .li-principal-properties {
+    padding-left: 0.5rem;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .li-custom-properties {
+    padding: 0.5rem;
+    list-style: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .li-custom-properties.aligned {
+    padding-left: 0;
+  }
+  .li-custom-container .tooltiptext {
+    visibility: hidden;
+    background: #3e4f62;
+    color: rgba(255, 255, 255, 0.87);
+    text-align: center;
+    border-radius: 6px;
+    padding: 0.75rem 0.75rem;
+    box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2),
+      0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12);
+
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 1;
+
+    /*
+    background: #3e4f62;
+    color: rgba(255, 255, 255, 0.87);
+    padding: 0.75rem 0.75rem;
+    box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2), 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12);
+    border-radius: 6px;
+    */
+  }
+
+  .li-custom-container:hover .tooltiptext {
+    visibility: visible;
+  }
+}
+
+.leaflet-control-layers-expanded {
+  max-height: 1800px;
+  overflow-y: auto;
+}
+
+.leaflet-control-layers-list {
+  max-height: 1950px;
+  overflow-y: auto;
+}
+
+.leaflet-control-layers-overlays {
+  height: 4096px;
+}
+
+.ref-1 {
+  background-image: url(images/hopital.png);
+  background-size: contain;
+  width: 24px;
+  height: 24px;
+  margin-right: 10px;
+}
+
+.ref-2 {
+  background-image: url(images/des-sports.png);
+  background-size: contain;
+  width: 24px;
+  height: 24px;
+  margin-right: 10px;
+}
+
+.ref-3 {
+  background-image: url(images/magasin-en-ligne.png);
+  background-size: contain;
+  width: 24px;
+  height: 24px;
+  margin-right: 10px;
+}
+
+.ref-4 {
+  background-image: url(images/hotel.png);
+  background-size: contain;
+  width: 24px;
+  height: 24px;
+  margin-right: 10px;
+}
+
+.ref-5 {
+  background-image: url(images/loisir.png);
+  background-size: contain;
+  width: 24px;
+  height: 24px;
+  margin-right: 10px;
+}
+
+.ref-6 {
+  background-image: url(images/470199.png);
+  background-size: contain;
+  width: 24px;
+  height: 24px;
+  margin-right: 10px;
+}
+
+.ref-7 {
+  background-image: url(images/restaurant.png);
+  background-size: contain;
+  width: 24px;
+  height: 24px;
+  margin-right: 10px;
+}
+
+.ref-8 {
+  background-image: url(images/habitants.png);
+  background-size: contain;
+  width: 24px;
+  height: 24px;
+  margin-right: 10px;
+}
+
+.ref-9 {
+  background-image: url(images/ecole.png);
+  background-size: contain;
+  width: 24px;
+  height: 24px;
+  margin-right: 10px;
+}
+
+.salaries {
+  background-image: url(images/470199.png);
+  background-size: contain;
+  width: 24px;
+  height: 24px;
+  margin-right: 10px;
+}
+
+.restaurant {
+  background-image: url(images/vaisselle.png);
+  background-size: contain;
+  width: 24px;
+  height: 24px;
+  margin-right: 10px;
+}
+
+.sante {
+  background-image: url(images/hopital.png);
+  background-size: contain;
+  width: 24px;
+  height: 24px;
+  margin-right: 10px;
+}
+
+.ecole {
+  background-image: url(images/ecole.png);
+  background-size: contain;
+  width: 24px;
+  height: 24px;
+  margin-right: 10px;
+}
+
+.magasin {
+  background-image: url(images/magasin-en-ligne.png);
+  background-size: contain;
+  width: 24px;
+  height: 24px;
+  margin-right: 10px;
+}
+
+.sport {
+  background-image: url(images/des-sports.png);
+  background-size: contain;
+  width: 24px;
+  height: 24px;
+  margin-right: 10px;
+}
+
+.hotel {
+  background-image: url(images/signe-de-lhotel.png);
+  background-size: contain;
+  width: 24px;
+  height: 24px;
+  margin-right: 10px;
+}
+
+.o-0 {
+  width: 40px;
+  height: 10px;
+  margin-left: 10px;
+  margin-right: 10px;
+  background-image: url('images/o-0.png');
+  background-repeat: no-repeat;
+}
+
+.o-1 {
+  width: 40px;
+  height: 10px;
+  margin-left: 10px;
+  margin-right: 10px;
+  background-image: url('images/o-1.png');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: bottom;
+}
+
+.o-2 {
+  width: 40px;
+  height: 10px;
+  margin-left: 10px;
+  margin-right: 10px;
+  background-image: url('images/o-2.png');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: bottom;
+}
+
+.o-3 {
+  width: 40px;
+  height: 10px;
+  margin-left: 10px;
+  margin-right: 10px;
+  background-image: url('images/o-3.png');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: bottom;
+}
+
+.o-4 {
+  width: 40px;
+  height: 10px;
+  margin-left: 10px;
+  margin-right: 10px;
+  background-image: url('images/o-4.png');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: bottom;
+}
+
+.o-5 {
+  width: 40px;
+  height: 10px;
+  margin-left: 10px;
+  margin-right: 10px;
+  background-image: url('images/o-5.png');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: bottom;
+}
+
+.o-6 {
+  width: 40px;
+  height: 10px;
+  margin-left: 10px;
+  margin-right: 10px;
+  background-image: url('images/o-6.png');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: bottom;
+}
+
+.o-7 {
+  width: 40px;
+  height: 10px;
+  margin-left: 10px;
+  margin-right: 10px;
+  background-image: url('images/o-7.png');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: bottom;
+}
+
+.o-8 {
+  width: 40px;
+  height: 10px;
+  margin-left: 10px;
+  margin-right: 10px;
+  background-image: url('images/o-8.png');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: bottom;
+}
+
+.o-9 {
+  width: 40px;
+  height: 10px;
+  margin-left: 10px;
+  margin-right: 10px;
+  background-image: url('images/o-9.png');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: bottom;
+}
+
+.ite-utile {
+  width: 40px;
+  height: 30px;
+  margin-left: 10px;
+  margin-right: 10px;
+  background-image: url('images/marker-ite_utile.svg');
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: bottom;
+}
+
+.ite-bon {
+  width: 40px;
+  height: 30px;
+  margin-left: 10px;
+  margin-right: 10px;
+  background-image: url('images/marker-ite_bon.svg');
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: bottom;
+}
+
+.ite-mauvais {
+  width: 40px;
+  height: 30px;
+  margin-left: 10px;
+  margin-right: 10px;
+  background-image: url('images/marker-ite_mauvais.svg');
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: bottom;
+}
+
+.ite-neuf {
+  width: 40px;
+  height: 30px;
+  margin-left: 10px;
+  margin-right: 10px;
+  background-image: url('images/marker-ite_neuf.svg');
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: bottom;
+}
+
+.ite-inutile {
+  width: 40px;
+  height: 30px;
+  margin-left: 10px;
+  margin-right: 10px;
+  background-image: url('images/marker-ite_inutile.svg');
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: bottom;
+}
+
+.pniveau {
+  width: 40px;
+  height: 30px;
+  margin-left: 10px;
+  margin-right: 10px;
+  background-image: url('images/marker-pniveau.svg');
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: bottom;
+}
+
+.college {
+  width: 40px;
+  height: 30px;
+  margin-left: 10px;
+  margin-right: 10px;
+  background-image: url('images/marker-ecole.svg');
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: bottom;
+}
+
+.g-0 {
+  width: 40px;
+  height: 30px;
+  margin-left: 10px;
+  margin-right: 10px;
+  background-image: url('images/marker-gares-closed.svg');
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center center;
+}
+
+.g-1 {
+  width: 40px;
+  height: 30px;
+  margin-left: 10px;
+  margin-right: 10px;
+  background-image: url('images/marker-gares.svg');
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center center;
+}
+
+.sideMenu {
+  position: absolute;
+  top: 100px;
+  left: 100px;
+  width: 300px;
+  height: 800px;
+  border-radius: 5px;
+  box-shadow: 5px 5px 5px #eeee;
+  z-index: 999999;
+  border: 1px solid darkgray;
+  background-color: #eeee;
+}
+
+.stats-title {
+  padding: 10px;
+  border-bottom: 1px solid black;
+}
+
+.mapbox {
+  position: relative;
+  width: 260px;
+  height: 130px;
+  border: 1px solid black;
+  border-radius: 2px;
+  float: left;
+  margin: 10px;
+  cursor: pointer;
+}
+
+.mapbox:hover {
+  border: 3px solid #343a40;
+}
+
+.map-sat {
+  background-image: url(images/menu/map-sat.png);
+  width: 150px;
+  height: 130px;
+}
+.carte-ign {
+  background-image: url(images/menu/carte-ign.png);
+  width: 150px;
+  height: 130px;
+}
+.plan-ign {
+  background-image: url(images/menu/plan-ign.png);
+  width: 150px;
+  height: 130px;
+}
+.map-osm {
+  background-image: url(images/menu/map-osm.png);
+  width: 150px;
+  height: 130px;
+}
+.map-transport {
+  background-image: url(images/menu/map-transport.png);
+  width: 150px;
+  height: 130px;
+}

@@ -1,0 +1,33 @@
+[
+  {
+    "label": "Cartographie",
+    "icon": "pi pi-map",
+    "routerLink": ["/pages"]
+  },
+  {
+    "label": "Méthodologie",
+    "icon": "pi pi-bookmark",
+    "routerLink": ["/pages/methodologie"],
+    "position": "bottom"
+  },
+  {
+    "label": "Page CEREMA du ferroviaire",
+    "icon": "pi pi-globe",
+    "url": "https://www.cerema.fr/fr/activites/mobilites/politiques-services-mobilite/ferroviaire",
+    "position": "bottom",
+    "type": "url"
+  },
+  {
+    "label": "Contact",
+    "icon": "pi pi-envelope",
+    "type": "mailto",
+    "url": "mailto:ferroviaire@cerema.fr",
+    "position": "bottom"
+  },
+  {
+    "label": "Mentions légales",
+    "icon": "pi pi-verified",
+    "routerLink": ["/pages/legal"],
+    "position": "bottom"
+  }
+]

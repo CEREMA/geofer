@@ -1,0 +1,8 @@
+<ul class="layout-menu">
+  <li app-menuitem *ngFor="let item of topMenuItems; let i = index;" [item]="item" [index]="i" [root]="true"></li>
+</ul>
+<div class="layout-menu-spacer"></div>
+<ul class="layout-menu layout-menu-bottom">
+  <li app-menuitem *ngFor="let item of bottomMenuItems; let i = index;" [item]="item" [index]="i" [root]="true"></li>
+</ul>
+<span style="color:white">&nbsp;v {{ version }}</span>

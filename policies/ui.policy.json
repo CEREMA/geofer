@@ -1,0 +1,4 @@
+{
+  "ADMIN": ["*"],
+  "GUEST": ["/pages", "/pages/profils", "/pages/projets", "/pages/nocluster"]
+}

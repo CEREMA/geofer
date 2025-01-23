@@ -1,0 +1,878 @@
+<p-toast position="top-right" [style]="{'z-index':'999999999999'}"></p-toast>
+
+<div *ngIf="isEraserVisible" class="toolbox">
+    <div pTooltip pTooltip="Effacer la sélection" tooltipPosition="right" (click)="eraseSelection()" class="delbtn">
+    </div>
+    <div pTooltip *ngIf="this.nbStats.gares" pTooltip="Afficher les informations agrégées sur le territoire sélectionné"
+        tooltipPosition="right" (click)="showStats()" class="histobtn"></div>
+</div>
+
+<!-- SEARCH -->
+<ng-select appendto="body" class="gares-selector" [items]="searchData" [groupBy]="groupByFn" [virtualScroll]="true"
+    bindLabel="name" bindValue="id" placeholder="Recherche" [(ngModel)]="selectedSearch" [searchable]="true"
+    [clearable]="true" (clear)="onSearchClear()" (ngModelChange)="onSearch($event)">
+    <ng-template ng-optgroup-tmp let-item="item">
+        <b>{{item.name}}</b>
+    </ng-template>
+    <ng-template ng-option-tmp let-item="item">
+        {{item.name}}
+    </ng-template>
+    <ng-template ng-notfound-tmp let-searchTerm="searchTerm">
+        <div class="ng-option disabled">
+            Aucun élément trouvé
+        </div>
+    </ng-template>
+</ng-select>
+
+<!-- MAP -->
+<div class="map-container">
+    <button (click)="performAction()" class="map-button layout-config-map-button ng-star-inserted">
+        <i class="pi pi-bars" style="font-size: 2rem;"></i>
+    </button>
+    <!-- SIDEBAR MENU -->
+    <p-sidebar class="sidebar-menu" position="left" [modal]="false" [showCloseIcon]="false" [closeOnEscape]="true"
+        [style]="{'box-shadow': '10px 0 5px -2px #0003','top':'70px','left':'70px','width':'350px', 'height':'calc(100vh - 70px)'}"
+        [dismissible]="true" [(visible)]="displaySideMenu">
+        <ng-template pTemplate="headless">
+            <div class="flex flex-column h-full">
+                <div
+                    style="border:0px solid transparent;z-index:1;position:absolute;top:0px;left:0px;width:30px;height:20px;background-color:var(--primary-500)">
+                    &nbsp;
+                </div>
+                <div style="z-index:555;box-shadow: -1px 0 0 0 white; border-top-left-radius: 30px;height:50px;background-color:var(--primary-500);"
+                    class="flex align-items-center justify-content-between flex-shrink-0">
+                    <h4 style="color:white;position: absolute;margin-top:2px;left:20px;">Cartographie</h4>
+                    <button style="color:white;position: absolute;margin-top:0px;right:20px;" type="button" pripple
+                        class="p-ripple p-element p-sidebar-close p-sidebar-icon p-link" (click)="hideMenu()">
+                        <span class="p-sidebar-close-icon pi pi-times"></span>
+                        <span class="p-ink" style="height: 26px; width: 26px; top: -2.25px; left: -9.75px;"></span>
+                    </button>
+                </div>
+                <div class="overflow-y-auto" style="flex-grow: 1; overflow-y: auto;">
+                    <p-accordion [multiple]="true" [activeIndex]="[0]">
+                        <p-accordionTab header="Fonds de carte">
+                            <div style="width:340px;height:300px">
+                                <div (click)="changeMap(LayerOSM)" class="mapbox map-osm">
+                                    <p
+                                        style="position:absolute;text-align:center;background-color:black;color:white;bottom:0px;left:0px;width:100%">
+                                        OpenStreetMap</p>
+                                </div>
+                                <div (click)="changeMap(LayerIGN)" class="mapbox plan-ign">
+                                    <p
+                                        style="position:absolute;text-align:center;background-color:black;color:white;bottom:0px;left:0px;width:100%">
+                                        Plans IGN</p>
+                                </div>
+                                <div (click)="changeMap(LayerSat)" class="mapbox map-sat">
+                                    <p
+                                        style="position:absolute;text-align:center;background-color:black;color:white;bottom:0px;left:0px;width:100%">
+                                        Satellite</p>
+                                </div>
+                                <div (click)="changeMap(LayerTransport)" class="mapbox carte-ign">
+                                    <p
+                                        style="position:absolute;text-align:center;background-color:black;color:white;bottom:0px;left:0px;width:100%">
+                                        Cartes IGN</p>
+                                </div>
+
+                            </div>
+                            <div style="padding:10px">
+                                Transparence :
+                                <p-slider [min]="0" [max]="100" [step]="5" [(ngModel)]="valueOpacity"
+                                    (onChange)="setLayerOpacity()"
+                                    [style]="{'margin-left':'10px','margin-top':'10px','width':'95%'}" />
+                            </div>
+                        </p-accordionTab>
+                        <p-accordionTab header="Gares">
+                            <div style="width:100%;height:90px" class="flex align-items-center">
+                                <table width="100%">
+                                    <tr>
+                                        <td>
+                                            <div class="g-1"></div>
+                                        </td>
+                                        <td style="margin-right:30px"><p-checkbox (onChange)="onMenuChange($event)"
+                                                [binary]="true" [(ngModel)]="GMenu.isGareOpen" />
+                                        </td>
+                                        <td style="width:80%;margin-left:10px">
+                                            <p class="ml-4">Gares ouvertes</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="margin-top:10px">
+                                            <div class="g-0"></div>
+                                        </td>
+                                        <td style="margin-right:30px">
+                                            <p-checkbox [binary]="true" [(ngModel)]="GMenu.isGareClosed"
+                                                (onChange)="onMenuChange($event)"></p-checkbox>
+                                        </td>
+                                        <td style="width:80%;">
+                                            <p class="ml-4">Gares fermées</p>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </p-accordionTab>
+                        <p-accordionTab header="Isochrones">
+                            <div style="width:100%;height:130px" class="flex align-items-center">
+                                <table width="100%">
+                                    <tr>
+                                        <td>
+                                            <div style="margin:10px;border:2px solid navy;width:30px;height:2px">
+                                            </div>
+                                        </td>
+                                        <td style="margin-right:30px"><p-checkbox (onChange)="onMenuChange($event)"
+                                                [binary]="true" [(ngModel)]="GMenu.iso1" />
+                                        </td>
+                                        <td style="width:80%;margin-left:10px">
+                                            <p class="ml-4">15 minutes à pied</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="margin-top:10px">
+                                            <div style="margin:10px;border:2px solid red;width:30px;height:2px">
+                                            </div>
+                                        </td>
+                                        <td style="margin-right:30px">
+                                            <p-checkbox [binary]="true" [(ngModel)]="GMenu.iso2"
+                                                (onChange)="onMenuChange($event)"></p-checkbox>
+                                        </td>
+                                        <td style="width:80%;">
+                                            <p class="ml-4">30 minutes à pied</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="margin-top:10px">
+                                            <div style="margin:10px;border:2px solid green;width:30px;height:2px">
+                                            </div>
+                                        </td>
+                                        <td style="margin-right:30px">
+                                            <p-checkbox [binary]="true" [(ngModel)]="GMenu.iso3"
+                                                (onChange)="onMenuChange($event)"></p-checkbox>
+                                        </td>
+                                        <td style="width:80%;">
+                                            <p class="ml-4">10 minutes en voiture</p>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </p-accordionTab>
+                        <p-accordionTab header="Installations terminales embranchées">
+                            <div style="width:100%;height:180px" class="flex align-items-center">
+                                <table width="100%">
+                                    <tr>
+                                        <td style="margin-top:10px">
+                                            <div class="ite-utile"></div>
+                                        </td>
+                                        <td style="margin-right:30px">
+                                            <p-checkbox [binary]="true" [(ngModel)]="GMenu.ite_utilise"
+                                                (onChange)="onMenuChange($event)"></p-checkbox>
+                                        </td>
+                                        <td style="width:80%;">
+                                            <p class="ml-4">ITE utilisées</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="ite-bon"></div>
+                                        </td>
+                                        <td style="margin-right:30px"><p-checkbox [binary]="true"
+                                                [(ngModel)]="GMenu.ite_bon"
+                                                (onChange)="onMenuChange($event)"></p-checkbox>
+                                        </td>
+                                        <td style="width:80%;margin-left:10px">
+                                            <p class="ml-4">ITE en bon état, inutilisées</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="margin-top:10px">
+                                            <div class="ite-neuf"></div>
+                                        </td>
+                                        <td style="margin-right:30px">
+                                            <p-checkbox [binary]="true" [(ngModel)]="GMenu.ite_neuf"
+                                                (onChange)="onMenuChange($event)"></p-checkbox>
+                                        </td>
+                                        <td style="width:80%;">
+                                            <p class="ml-4">ITE neuves, inutilisées</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="margin-top:10px">
+                                            <div class="ite-mauvais"></div>
+                                        </td>
+                                        <td style="margin-right:30px">
+                                            <p-checkbox [binary]="true" [(ngModel)]="GMenu.ite_mauvais"
+                                                (onChange)="onMenuChange($event)"></p-checkbox>
+                                        </td>
+                                        <td style="width:80%;">
+                                            <p class="ml-4">ITE en mauvais état, inutilisées</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="margin-top:10px">
+                                            <div class="ite-inutile"></div>
+                                        </td>
+                                        <td style="margin-right:30px">
+                                            <p-checkbox [binary]="true" [(ngModel)]="GMenu.ite_inutile"
+                                                (onChange)="onMenuChange($event)"></p-checkbox>
+                                        </td>
+                                        <td style="width:80%;">
+                                            <p class="ml-4">ITE inutilisables</p>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </p-accordionTab>
+                        <p-accordionTab header="Réseau ferroviaire">
+                            <div style="width:100%;height:170px" class="flex align-items-center">
+                                <table width="100%">
+                                    <tr>
+                                        <td>
+                                            <div class="o-9"></div>
+                                        </td>
+                                        <td style="margin-right:30px"><p-checkbox (onChange)="onMenuChange($event)"
+                                                [binary]="true" [(ngModel)]="GMenu.fer_lgv" />
+                                        </td>
+                                        <td style="width:80%;margin-left:10px">
+                                            <p class="ml-4">Lignes à grandes vitesses</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="o-8"></div>
+                                        </td>
+                                        <td style="margin-right:30px"><p-checkbox (onChange)="onMenuChange($event)"
+                                                [binary]="true" [(ngModel)]="GMenu.fer_mixte" />
+                                        </td>
+                                        <td style="width:80%;margin-left:10px">
+                                            <p class="ml-4">Lignes mixtes</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="o-4"></div>
+                                        </td>
+                                        <td style="margin-right:30px"><p-checkbox (onChange)="onMenuChange($event)"
+                                                [binary]="true" [(ngModel)]="GMenu.fer_fret" />
+                                        </td>
+                                        <td style="width:80%;margin-left:10px">
+                                            <p class="ml-4">Lignes fret</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="o-0"></div>
+                                        </td>
+                                        <td style="margin-right:30px"><p-checkbox (onChange)="onMenuChange($event)"
+                                                [binary]="true" [(ngModel)]="GMenu.fer_off" />
+                                        </td>
+                                        <td style="width:80%;margin-left:10px">
+                                            <p class="ml-4">Lignes non exploitées</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="pniveau"></div>
+                                        </td>
+                                        <td style="margin-right:30px"><p-checkbox (onChange)="onMenuChange($event)"
+                                                [binary]="true" [(ngModel)]="GMenu.pn" />
+                                        </td>
+                                        <td style="width:80%;margin-left:10px">
+                                            <p class="ml-4">Passages à niveau</p>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </p-accordionTab>
+                        <p-accordionTab header="Autres couches">
+                            <div style="height:20px">&nbsp;</div>
+                            <div style="width:100%;height:120px" class="flex align-items-start">
+                                <table width="100%">
+                                    <tr>
+                                        <td style="margin-top:10px">
+                                            <div class="college"></div>
+                                        </td>
+                                        <td style="margin-right:30px">
+                                            <p-checkbox [binary]="true" [(ngModel)]="GMenu.es"
+                                                (onChange)="onMenuChange($event)"></p-checkbox>
+                                        </td>
+                                        <td style="width:80%;">
+                                            <p class="ml-4">Collèges ou lycées</p>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </p-accordionTab>
+                    </p-accordion>
+                </div>
+            </div>
+
+        </ng-template>
+    </p-sidebar>
+    <!-- SIDEBAR STATS -->
+    <p-sidebar position="right" [modal]="false" [showCloseIcon]="true" [closeOnEscape]="false" styleClass="w-6"
+        [dismissible]="false" [(visible)]="displayStatsPanel">
+        <ng-template pTemplate="headless">
+            <div class="flex flex-column h-full">
+                <div style="padding:20px;height:70px;background-color:var(--primary-500)"
+                    class="flex align-items-center justify-content-between flex-shrink-0">
+                    <h4 style="color:white;position: absolute;margin-top:0px;left:20px;">{{statTitle}}</h4>
+                    <button style="color:white;position: absolute;margin-top:0px;right:20px;" type="button" pripple
+                        class="p-ripple p-element p-sidebar-close p-sidebar-icon p-link" (click)="closeStatsSidebar()">
+                        <span class="p-sidebar-close-icon pi pi-times"></span>
+                        <span class="p-ink" style="height: 26px; width: 26px; top: -2.25px; left: -9.75px;"></span>
+                    </button>
+                </div>
+                <div class="overflow-y-auto h-full">
+                    <div style="padding:20px">
+                        <h5>Nombre de gares : <b>{{nbStats.gares}}</b></h5>
+                        <p>Nombre de gares ouvertes : {{nbStats.isOpen}} - {{nbStats.percentOpen}}%
+                            <br>Nombre de gares fermées : {{nbStats.isClosed}} - {{nbStats.percentClosed}}%
+                        </p>
+                        <h5>Nombre de passages à niveau : <b>{{selectedPassagesANiveau?.length}}</b></h5>
+                    </div>
+                    <div class="accordion">
+                        <input type="checkbox" checked id="section5" class="accordion-input" appAccordion>
+                        <label for="section5" class="accordion-label">
+                            <table>
+                                <tr>
+                                    <td><i style="font-size:22px;margin-right: 4px"
+                                            class="pi pi-angle-double-right"></i>
+                                    </td>
+                                    <td style="font-size:18px; position: relative; top: -2px; ">Fréquentation des
+                                        gares&nbsp;
+                                    </td>
+                                </tr>
+                            </table>
+                        </label>
+                        <div class="accordion-content" style="width:100%;font-size:14px;">
+                            <div class="title5">Fréquentation au fil du temps
+                            </div>
+                            <p-chart style="height:250px" *ngIf="display4==false" type="line"
+                                [data]="statsFrequentation" [options]="optionsFrequentation" />
+                            <div class="margin-bottom:30px;margin-left:90px;" *ngIf="display4===true">
+                                Aucune information disponible
+                            </div>
+                            <div class="title5">Fréquentation des gares&nbsp;<span *ngIf="nbStats.gares>=16">les
+                                    plus
+                                    importantes</span>&nbsp;(en
+                                {{lastYearFrequentation}})
+                                <span *ngIf="nbStats.gares>=16" pTooltip [pTooltip]="tooltipContent"
+                                    tooltipPosition="top" style="float:right" class="point-interrogation"></span>
+                            </div>
+                            <p-chart *ngIf="display6==false" type="bar" [data]="statsFrequentationParGare"
+                                [options]="optionsStackedFreq" />
+                            <div class="margin-bottom:30px;margin-left:90px;" *ngIf="display6===true">
+                                Aucune information disponible
+                            </div>
+                        </div>
+
+                        <input type="checkbox" id="section4" class="accordion-input" appAccordion>
+                        <label for="section4" class="accordion-label">
+                            <table>
+                                <tr>
+                                    <td><i style="font-size:22px;margin-right: 4px"
+                                            class="pi pi-angle-double-right"></i>
+                                    </td>
+                                    <td style="font-size:18px; position: relative; top: -2px; ">Nombre d’arrêts en
+                                        gare
+                                        sur
+                                        une journée
+                                    </td>
+                                </tr>
+                            </table>
+                        </label>
+                        <div class="accordion-content" style="width:100%;font-size:14px;">
+                            <div class="title5">Dans&nbsp;<span *ngIf="nbStats.gares<16">toutes
+                                    les
+                                    gares sélectionnées</span><span *ngIf="nbStats.gares>=16">les
+                                    gares les plus
+                                    importantes</span>&nbsp;
+                                <span *ngIf="nbStats.gares>=16" pTooltip [pTooltip]="tooltipContent"
+                                    tooltipPosition="top" style="float:right" class="point-interrogation"></span>
+                            </div>
+                            <p-chart *ngIf="display3===false" type="bar" [data]="dataDesserte"
+                                [options]="optionsStacked" />
+                            <div class="margin-bottom:30px;margin-left:90px;" *ngIf="display3===true">
+                                Aucune information disponible
+                            </div>
+                        </div>
+
+                        <input type="checkbox" id="section2" class="accordion-input" appAccordion>
+                        <label for="section2" class="accordion-label">
+                            <table>
+                                <tr>
+                                    <td><i style="font-size:22px;margin-right: 4px"
+                                            class="pi pi-angle-double-right"></i>
+                                    </td>
+                                    <td style="font-size:18px; position: relative; top: -2px; ">Bassin de
+                                        population,
+                                        d'emplois
+                                        et d'élèves du secondaire</td>
+                                </tr>
+                            </table>
+                        </label>
+                        <div class="accordion-content" style="width:100%;">
+                            <div class="title5">Autour de l'ensemble des gares sélectionnées
+
+                            </div>
+
+                            <p-chart *ngIf="display2==false" height="150" type="bar" [data]="statsBassinPopulation"
+                                [options]="optionsBassinPopulation" />
+                            <div class="margin-bottom:30px;margin-left:90px;" *ngIf="display2===true">
+                                Aucune information disponible
+                            </div>
+                            <div class="title5">A 30 minutes à pied des gares&nbsp;<span *ngIf="nbStats.gares>=16">les
+                                    plus
+                                    importantes</span>
+                                <span *ngIf="nbStats.gares>=16" pTooltip [pTooltip]="tooltipContent"
+                                    tooltipPosition="top" style="float:right" class="point-interrogation"></span>
+                            </div>
+                            <p-chart *ngIf="display5==false" height="200" type="bar" [data]="dataPopulationParGare"
+                                [options]="optionsStacked" />
+                            <div class="margin-bottom:30px;margin-left:90px;" *ngIf="display5===true">
+                                Aucune information disponible
+                            </div>
+                        </div>
+
+                        <input type="checkbox" id="section3" class="accordion-input" appAccordion>
+                        <label for="section3" class="accordion-label">
+                            <table>
+                                <tr>
+                                    <td><i style="font-size:22px;margin-right: 4px"
+                                            class="pi pi-angle-double-right"></i>
+                                    </td>
+                                    <td style="font-size:18px; position: relative; top: -2px; ">Aménités à proximité
+                                        des
+                                        gares
+                                    </td>
+                                </tr>
+                            </table>
+                        </label>
+                        <div class="accordion-content" style="width:100%;max-height:780px;font-size:14px;">
+                            <div class="title5">A proximité de l'ensemble des gares sélectionnées
+                            </div>
+                            <p-chart *ngIf="display0===false" height="150" type="bar" [data]="statsAmenities"
+                                [options]="optionsAmenities" />
+                            <div class="margin-bottom:30px;margin-left:90px;" *ngIf="display0===true">
+                                Aucune information disponible
+                            </div>
+                            <div class="title5">A 30 minutes à pied des gares&nbsp;<span *ngIf="nbStats.gares>=16">les
+                                    plus
+                                    importantes</span><span *ngIf="nbStats.gares<16">sélectionnées</span>
+                                <span *ngIf="nbStats.gares>=16" pTooltip [pTooltip]="tooltipContent"
+                                    tooltipPosition="top" style="float:right" class="point-interrogation"></span>
+                            </div>
+                            <p-chart *ngIf="display1===false" type="bar" [data]="dataAmenitiesParGare"
+                                [options]="optionsStacked" />
+                            <div class="margin-bottom:30px;margin-left:90px;" *ngIf="display1===true">
+                                Aucune information disponible
+                            </div>
+                        </div>
+
+                        <input type="checkbox" id="section6" class="accordion-input" appAccordion>
+                        <label for="section6" class="accordion-label">
+                            <table style="width:100%">
+                                <tr>
+                                    <td style="width:30px"><i style="font-size:22px;margin-right: 4px"
+                                            class="pi pi-angle-double-right"></i></td>
+                                    <td style="text-align:left; font-size:18px; position: relative; top: -2px; ">
+                                        Liste
+                                        des
+                                        gares
+                                    </td>
+                                    <td width="40%" align=right><button [disabled]="disabledExport" style="zoom:0.8"
+                                            pButton (click)="exportCSV()" label="Export CSV"></button>
+                                    </td>
+                                </tr>
+                            </table>
+                        </label>
+                        <div class="accordion-content" style="width:100%;font-size:14px;">
+                            <p-table [(first)]="first" (onPage)="onPageChange($event)" (onSort)="onSort($event)"
+                                styleClass="p-datatable-sm" [paginator]="true" [rows]="10"
+                                [totalRecords]="tableStacks.length" [value]="tableStacks"
+                                [tableStyle]="{ 'width': '100%' }">
+                                <ng-template pTemplate="header">
+                                    <tr>
+                                        <th pSortableColumn="nom_gare"><small>Gare <p-sortIcon
+                                                    field="nomGare" /></small>
+                                        </th>
+                                        <th pSortableColumn="statut_gare"><small>Statut <p-sortIcon
+                                                    field="statutGare" /></small>
+                                        </th>
+                                        <th pSortableColumn="nomAom"><small>AOM <p-sortIcon field="nomAom" /></small>
+                                        </th>
+                                        <th pSortableColumn="voyageurs"><small>Voyageurs {{
+                                                tableStacks[0]?.anneevoyageurs }}
+                                                <p-sortIcon field="voyageurs" /></small>
+                                        </th>
+                                        <th pSortableColumn="nombreArretsTotal"><small>Total arrêts <p-sortIcon
+                                                    field="nombreArretsTotal" /></small></th>
+                                    </tr>
+                                </ng-template>
+                                <ng-template pTemplate="body" let-stack>
+                                    <tr>
+                                        <td>{{ stack.nomGare }}</td>
+                                        <td>{{ stack.statutGare }}</td>
+                                        <td>{{ stack.nomAom }}</td>
+                                        <td style="text-align:right">{{ stack.voyageurs }}</td>
+                                        <td style="text-align:right">{{ stack.nombreArretsTotal }}</td>
+                                    </tr>
+                                </ng-template>
+                            </p-table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ng-template>
+    </p-sidebar>
+    <!-- SIDEBAR ITE -->
+    <p-sidebar position="right" [modal]="false" [showCloseIcon]="false" [closeOnEscape]="false" styleClass="w-4"
+        [dismissible]="false" [(visible)]="displayInfoITE">
+        <ng-template pTemplate="headless">
+            <div class="flex flex-column">
+                <div style="padding:20px;height:70px;background-color:var(--primary-500)"
+                    class="flex align-items-center justify-content-between flex-shrink-0">
+                    <div pTooltip="Centrer la carte sur l'ITE" (click)="focusOnMarkerITE($event)"
+                        style="cursor:pointer;margin-left:-5px" [class]="currentITE"></div>
+
+                    <h4 style="color:white;position: absolute;margin-top:0px;left:60px;">{{selectedITE?.raisonSociale}}
+                    </h4>
+
+                    <button type="button" pripple class="p-ripple p-element p-sidebar-close p-sidebar-icon p-link"
+                        style="color:white" (click)="hideITESidebar()">
+                        <span class="p-sidebar-close-icon pi pi-times"></span>
+                        <span class="p-ink" style="height: 26px; width: 26px; top: -2.25px; left: -9.75px;"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="overflow-y-auto h-full">
+                <div style="margin:10px">
+                    <div pTooltip="Ouvrir Street View dans un nouvel onglet" tooltipPosition="right"
+                        (click)="gotoStreetView()" class="googleman"></div>
+                </div>
+                <div style="margin:10px">
+                    <h5>Etat de l'ITE : {{selectedITE?.etatIte}}</h5>
+                    <p>Date de l'enquête : {{selectedITE?.dateEnquete | date:'d MMMM y'}}
+                </div>
+                <hr />
+                <div style="margin:10px;">
+                    <p class="ite_title">Nature de l'activité :
+                        <span style="font-weight:normal">{{selectedITE?.refActivitePrincipale?.libelle}}</span>
+                    </p>
+                </div>
+                <div style="margin:10px;">
+                    <p class="ite_title">Marchandises reçues :
+                        <span *ngIf="selectedITE?.flux?.recue"
+                            style="font-weight:normal">{{selectedITE?.flux?.recue}}</span>
+                        <span *ngIf="!selectedITE?.flux?.recue" style="font-weight:normal">non renseigné</span>
+                    </p>
+                </div>
+                <div style="margin:10px;">
+                    <p class="ite_title">Marchandises expédiées :
+                        <span *ngIf="selectedITE?.flux?.expediee"
+                            style="font-weight:normal">{{selectedITE?.flux?.expediee}}</span>
+                        <span *ngIf="!selectedITE?.flux?.expediee" style="font-weight:normal">non renseigné</span>
+                    </p>
+                </div>
+                <hr>
+                <div style="margin:10px;">
+                    <p class="ite_title">Nombre de voies :
+                        <span *ngIf="selectedITE?.nombreVoies"
+                            style="font-weight:normal">{{selectedITE?.nombreVoies}}</span>
+                        <span *ngIf="!selectedITE?.nombreVoies" style="font-weight:normal">non renseigné</span>
+                    </p>
+                </div>
+                <div style="margin:10px;">
+                    <p class="ite_title">Longueur de voie la plus longue : <span *ngIf="!selectedITE?.longueurVoie"
+                            style="font-weight:normal">non renseigné</span><span *ngIf="selectedITE?.longueurVoie"
+                            style="font-weight:normal">{{selectedITE?.longueurVoie}} mètres</span>
+                </div>
+                <hr>
+                <div style="margin:10px;">
+                    <p *ngIf="selectedITE?.etatIte!='Utilisée'" class="ite_title">Projet de réutiliser l'ITE : <span
+                            *ngIf="selectedITE?.siReutilisationPrevue!==true && selectedITE?.siReutilisationPrevue!==false"
+                            style="font-weight:normal">non
+                            renseigné</span><span *ngIf="selectedITE?.siReutilisationPrevue===true"
+                            style="font-weight:normal">oui</span><span
+                            *ngIf="selectedITE?.siReutilisationPrevue===false" style="font-weight:normal">non</span>
+                </div>
+            </div>
+        </ng-template>
+    </p-sidebar>
+    <!-- SIDEBAR GARES -->
+    <p-sidebar position="right" [modal]="false" [showCloseIcon]="false" [closeOnEscape]="false" styleClass="w-4"
+        [dismissible]="false" [(visible)]="displayInfo">
+        <ng-template pTemplate="headless">
+            <div class="flex flex-column h-full">
+                <div style="padding:20px;height:70px;background-color:var(--primary-500)"
+                    class="flex align-items-center justify-content-between flex-shrink-0">
+                    <div pTooltip="Centrer la carte sur la gare" (click)="focusOnMarkerGare($event)"
+                        style="cursor:pointer;margin-left:-5px" [class]="currentGareIcon">
+                    </div>
+
+                    <h4 style="color:white;position: absolute;margin-top:5px;left:60px;">{{selectedGare?.nomGare}}</h4>
+
+                    <button style="color:white" type="button" pripple
+                        class="p-ripple p-element p-sidebar-close p-sidebar-icon p-link" (click)="hideSidebar()">
+                        <span class="p-sidebar-close-icon pi pi-times"></span>
+                        <span class="p-ink" style="height: 26px; width: 26px; top: -2.25px; left: -9.75px;"></span>
+                    </button>
+                </div>
+                <div class="overflow-y-auto h-full">
+
+                    <div style="padding:20px;">
+                        <div pTooltip="Ouvrir Street View dans un nouvel onglet" tooltipPosition="right"
+                            (click)="gotoStreetView()" class="googleman"></div>
+                        <h5 *ngIf="selectedGare?.siOuverte===true">Gare ouverte</h5>
+                        <h5 *ngIf="selectedGare?.siOuverte===false">Gare fermée</h5>
+                        <p style="margin-top:10px">Autorité organisatrice des mobilités sur le territoire : {{
+                            selectedGare?.nomAom }}
+                        <p style="margin-top:-10px">Autorité organisatrice des mobilités régionale : {{
+                            selectedGareRegion
+                            }}
+                        </p>
+                        <p style="margin-top:-10px">{{ statLabel }}</p>
+                    </div>
+                    <div class="accordion">
+                        <input type="checkbox" checked id="section1" class="accordion-input" appAccordion>
+                        <label for="section1" class="accordion-label">
+                            <table>
+                                <tr>
+                                    <td><i style="font-size:22px;margin-right: 4px"
+                                            class="pi pi-angle-double-right"></i>
+                                    </td>
+                                    <td style="font-size:18px; position: relative; top: -2px; ">Fréquentation de la gare
+                                    </td>
+                                </tr>
+                            </table>
+                        </label>
+                        <div class="accordion-content" style="width:100%">
+                            <p style="font-size:14px;margin-top:-10px">Nombre de voyageurs par année</p>
+                            <p-chart height="200" type="line" [data]="dataF" [options]="optionsF"></p-chart>
+                        </div>
+
+                        <input type="checkbox" id="section2" class="accordion-input" appAccordion>
+                        <label for="section2" class="accordion-label">
+                            <table>
+                                <tr>
+                                    <td><i style="font-size:22px;margin-right: 4px"
+                                            class="pi pi-angle-double-right"></i>
+                                    </td>
+                                    <td style="font-size:18px; position: relative; top: -2px; ">Nombre d'arrêts en
+                                        gare
+                                        sur
+                                        une
+                                        journée</td>
+                                </tr>
+                            </table>
+                        </label>
+                        <div class="accordion-content" style="width:100%">
+                            <p style="font-size:14px;margin-top:-10px"> Nombre total d'arrêts en gare dans les deux
+                                sens
+                                :
+                                {{totalArrets}}</p><br>
+                            <p-chart *ngIf="totalArrets>0" height="200" type="bar" [data]="dataA"
+                                [options]="optionsF"></p-chart>
+                        </div>
+
+                        <input type="checkbox" id="section3" class="accordion-input" appAccordion>
+                        <label for="section3" class="accordion-label">
+                            <table>
+                                <tr>
+                                    <td><i style="font-size:22px;margin-right: 4px"
+                                            class="pi pi-angle-double-right"></i>
+                                    </td>
+                                    <td style="font-size:18px; position: relative; top: -2px; ">A moins de 30
+                                        minutes à
+                                        pied
+                                        de
+                                        la
+                                        gare {{sumUpYear}}</td>
+                                </tr>
+                            </table>
+                        </label>
+                        <div class="accordion-content" style="width:100%;font-size:14px;">
+                            <p *ngIf="currentData.length==0">Aucune information disponible</p>
+                            <table *ngIf="currentData.length>0" style="width:100%">
+                                <tr *ngFor="let d of currentData">
+                                    <td>
+                                        <div [class]="d.type"></div>
+                                    </td>
+                                    <td>
+                                        <span *ngIf="d.nombre>=0">en {{d.annee}} : {{d.nombre}}</span> {{d.typeDonnee}}
+                                        <span *ngIf="!d.nombre && d.nombre!=0">-
+                                            non renseigné</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </ng-template>
+    </p-sidebar>
+    <!-- MAP -->
+    <div id="map" class="map" (baselayerchange)="baselayerchange($event)" (leafletMapMoveEnd)="onMoveEnd($event)"
+        (leafletMapZoomEnd)="onZoomEnd($event)" leaflet (leafletMapReady)="onMapReady($event)"
+        [leafletOptions]="options">
+    </div>
+</div>
+
+<!-- LEGENDE -->
+<div [ngClass]="{'info': !Legende, 'info-expanded': Legende}">
+    <div class="infoTitle" (click)="displayLegende()">Légende<div class="chevron"><i *ngIf="!Legende"
+                class="pi pi-angle-double-up"></i><i *ngIf="Legende" class="pi pi-angle-double-down"></i>
+        </div>
+    </div>
+    <div class="leyenda">
+        <h5 style="font-size: 14px; font-weight:bold; margin-left:10px">Gares</h5>
+        <table>
+            <tr>
+                <td>
+                    <div class="g-1"></div>
+                </td>
+                <td>Gare ouverte</td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="g-0"></div>
+                </td>
+                <td>Gare fermée</td>
+            </tr>
+        </table>
+        <h5 style="margin-top:10px;font-size: 14px; font-weight:bold; margin-left:10px">Installations terminales
+            embranchées</h5>
+        <table>
+            <tr>
+                <td>
+                    <div class="ite-utile"></div>
+                </td>
+                <td>ITE utilisée</td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="ite-neuf"></div>
+                </td>
+                <td>ITE neuve, non utilisée</td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="ite-bon"></div>
+                </td>
+                <td>ITE en bon état, inutilisée</td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="ite-mauvais"></div>
+                </td>
+                <td>ITE en mauvais état, inutilisée</td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="ite-inutile"></div>
+                </td>
+                <td>ITE inutilisable</td>
+            </tr>
+        </table>
+        <h5 style="margin-top:10px;font-size: 14px; font-weight:bold; margin-left:10px">Voies ferrées</h5>
+        <table>
+            <tr>
+                <td>
+                    <div class="o-9"></div>
+                </td>
+                <td>Ligne à grande vitesse</td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="o-8"></div>
+                </td>
+                <td>Voie double électrifiée</td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="o-7"></div>
+                </td>
+                <td>Voie unique électrifiée</td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="o-6"></div>
+                </td>
+                <td>Voie double non électrifiée</td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="o-5"></div>
+                </td>
+                <td>Voie unique non électrifiée</td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="o-4"></div>
+                </td>
+                <td>Voie double fret électrifiée</td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="o-3"></div>
+                </td>
+                <td>Voie unique fret électrifiée</td>
+            </tr>
+
+            <tr>
+                <td>
+                    <div class="o-2"></div>
+                </td>
+                <td>Voie double fret non électrifiée</td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="o-1"></div>
+                </td>
+                <td>Voie unique fret non électrifiée</td>
+            </tr>
+
+            <tr>
+                <td>
+                    <div class="o-0"></div>
+                </td>
+                <td align="left">Ligne non exploitée</td>
+            </tr>
+        </table>
+        <h5 style="margin-top:10px;font-size: 14px; font-weight:bold;margin-left:10px">Isochrones</h5>
+        <table>
+            <tr>
+                <td>
+                    <div class="color single blue"></div>
+                </td>
+                <td>
+                    <div class="infoLegende">15 minutes à pied</div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="color single red"></div>
+                </td>
+                <td>
+                    <div class="infoLegende">30 minutes à pied</div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="color single green"></div>
+                </td>
+                <td>
+                    <div class="infoLegende">10 minutes en voiture</div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<!-- TOOLTIP -->
+<ng-template #tooltipContent>
+    <div class="flex align-items-center">
+        <span><b>Gares les plus importantes</b><br>Il s'agit des 15 gares les plus importantes<br> en termes de
+            fréquentation
+            par des voyageurs</span>
+    </div>
+</ng-template>

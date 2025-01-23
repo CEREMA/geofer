@@ -1,0 +1,86 @@
+// Variables pour la cohérence des couleurs et des polices
+$primary-color: #0056b3;
+$secondary-color: #f0f0f0;
+$text-color: #333;
+$font-family: 'Arial', sans-serif;
+$line-height: 1.6;
+$heading-font-size: 2.5rem;
+$subheading-font-size: 1.8rem;
+$list-item-margin: 0.5rem 0;
+
+.display {
+  // Police globale et couleur du texte
+  font-family: $font-family;
+  color: $text-color;
+  line-height: $line-height;
+  padding: 20px;
+  background-color: $secondary-color;
+
+  // Styles pour les titres principaux
+  h1 {
+    font-size: $heading-font-size;
+    color: $primary-color;
+    margin-bottom: 20px;
+    border-bottom: 2px solid $primary-color;
+    padding-bottom: 10px;
+  }
+
+  // Styles pour les sous-titres
+  h3 {
+    font-size: $subheading-font-size;
+    color: darken($primary-color, 10%);
+    margin-top: 30px;
+    margin-bottom: 10px;
+  }
+
+  // Styles pour les paragraphes
+  p {
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+  }
+
+  // Style pour les listes
+  ul {
+    list-style-type: disc;
+    padding-left: 20px;
+    margin-bottom: 20px;
+
+    li {
+      font-size: 1rem;
+      margin: $list-item-margin;
+      line-height: 1.4;
+
+      // Surlignage des éléments importants
+      strong {
+        color: darken($primary-color, 15%);
+        font-weight: bold;
+      }
+    }
+  }
+
+  // Liens pour les données externes
+  a {
+    color: $primary-color;
+    text-decoration: none;
+    border-bottom: 1px dashed $primary-color;
+    &:hover {
+      color: darken($primary-color, 10%);
+      border-bottom: 1px solid darken($primary-color, 10%);
+    }
+  }
+
+  // Espacement supplémentaire entre sections
+  .spacer {
+    margin: 40px 0;
+  }
+}
+
+.logo {
+  background-image: url(images/railwaylogo.jpg);
+  width: 100%;
+  height: 300px;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  border: 0px solid black;
+}

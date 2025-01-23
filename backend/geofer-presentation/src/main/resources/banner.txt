@@ -1,0 +1,3 @@
+${AnsiColor.GREEN}Geofer ${AnsiColor.BLUE}${info.app.version}
+${AnsiColor.CYAN}${info.app.description}
+${AnsiColor.DEFAULT}

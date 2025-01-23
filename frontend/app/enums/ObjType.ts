@@ -1,0 +1,11 @@
+enum ObjType {
+  COLUMN="COLUMN",
+  DATABASE="DATABASE",
+  FUNCTION="FUNCTION",
+  SCHEMA="SCHEMA",
+  SEQUENCE="SEQUENCE",
+  TABLE="TABLE",
+  VIEW="VIEW"
+}
+  
+export default ObjType;
